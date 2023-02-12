@@ -11,14 +11,15 @@ import java.net.Socket;
  */
 public class SimpleWebServer {
     public static final int PORT = 8090;
-    public static final String WEB_ROOT = "H:\\school\\SDEV301Fall2022\\html";
+    //public static final String WEB_ROOT = "H:\\school\\SDEV301Fall2022\\html";
 
     /**
      * Main
      * @param args not used
      */
     public static void main(String[] args) {
-        try (ServerSocket server = new ServerSocket(PORT, 0, InetAddress.getLoopbackAddress())) {
+        //try (ServerSocket server = new ServerSocket(PORT, 0, InetAddress.getLoopbackAddress())) {
+        try (ServerSocket server = new ServerSocket(PORT)) {
             System.out.println("Server starting.....");
             for(;;){
                 Socket client = server.accept();

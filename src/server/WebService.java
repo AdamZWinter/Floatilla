@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -55,12 +56,26 @@ public class WebService implements Runnable{
                 }
             }
 
+            if(requestHeaders.size() == 0){
+                System.out.println("request has no headers"+System.lineSeparator());
+                sendToClient.close();
+                readFromClient.close();
+                client.close();
+                //System.exit(1);
+                Thread.currentThread().interrupt();
+                return;
+            }
+
             String[] argArray = requestHeaders.get(0).split(" ");
             if(argArray[0].compareTo("GET") == 0){
                 performService("GET", argArray[1]);
             }else{
                 System.out.println("Did not receive GET request.");
-                System.exit(-1);
+                sendToClient.close();
+                readFromClient.close();
+                client.close();
+                Thread.currentThread().interrupt();
+                return;
             }
 
         } catch (IOException e) {
@@ -73,7 +88,15 @@ public class WebService implements Runnable{
     //returns the lines of the file as it reads them
     //if no file is specified, then the lines of index.html (found in the WEB_ROOT) are returned
     private void performService(String command, String requestPath) throws IOException {
+        sendToClient.println("Verb: "+command+"  requestPath: "+ requestPath);
         //sendToClient.println("Thank you, come again.");
+        //URL url1 = new URL("https://i.natgeofe.com/k/9acd2bad-fb0e-43a8-935d-ec0aefc60c2f/monarch-butterfly-grass_4x3.jpg");
+//        sendToClient.println("<html><body>" +
+//                "<p><h1>Butterfly</h1></p>" +
+//                "<p><h3>This is a monarch butterfly.</h3></p>" +
+//                "<img heigh=500 width=500 src=\"https://i.natgeofe.com/k/9acd2bad-fb0e-43a8-935d-ec0aefc60c2f/monarch-butterfly-grass_4x3.jpg\">" +
+//                "</body></html>");
+        System.out.println("Verb: "+command+"  requestPath: "+ requestPath);
         //String encodedString = Base64.getEncoder().encodeToString("My test string".getBytes());
         //sendToClient.println(encodedString);
         //String encodedString = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8bWV0YSBodHRwLWVxdWl2PSJDb250ZW50LVR5cGUiIGNvbnRlbnQ9InRleHQvaHRtbDsgY2hhcnNldD11dGYtOCI+ICAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wIj4gIAogICAgPHRpdGxlPldlbGNvbWU8L3RpdGxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGRpdj4KICAgICAgICA8aDE+V2VsY29tZSE8L2gxPgogICAgICAgIDxoMT5CaWVudmVuaWRvcyE8L2gxPgogICAgPC9kaXY+CiAgICA8aDE+VGhhbmtzIGZvciB2aXNpdGluZyE8L2gxPgo8L2JvZHk+CjwvaHRtbD4=";
@@ -81,23 +104,23 @@ public class WebService implements Runnable{
         //System.out.println(new String(Base64.getDecoder().decode(encodedString)));
         //sendToClient.println(new String(Base64.getDecoder().decode(encodedString)));
 
-        String filePath = SimpleWebServer.WEB_ROOT;
-        if(requestPath.compareTo("/") == 0){
-            filePath = filePath + "\\index.html";
-        }else{
-            filePath = filePath + requestPath;
-        }
-
-        try {
-            Scanner fileIn = new Scanner(new File(filePath));
-            //fileIn.useDelimiter("");
-            while(fileIn.hasNext()){
-                sendToClient.println(fileIn.nextLine());
-            }//end while
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found. ");
-            sendToClient.println("404 File Not Found: "+filePath);
-        }
+//        String filePath = SimpleWebServer.WEB_ROOT;
+//        if(requestPath.compareTo("/") == 0){
+//            filePath = filePath + "\\index.html";
+//        }else{
+//            filePath = filePath + requestPath;
+//        }
+//
+//        try {
+//            Scanner fileIn = new Scanner(new File(filePath));
+//            //fileIn.useDelimiter("");
+//            while(fileIn.hasNext()){
+//                sendToClient.println(fileIn.nextLine());
+//            }//end while
+//        } catch (FileNotFoundException e) {
+//            System.out.println("File not found. ");
+//            sendToClient.println("404 File Not Found: "+filePath);
+//        }
 
         sendToClient.flush();
         sendToClient.close();
