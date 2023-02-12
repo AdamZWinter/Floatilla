@@ -1,4 +1,4 @@
 FROM openjdk:19
-COPY ./src/ /tmp
+COPY ./out/artifacts/Floatilla_jar/Floatilla.jar /tmp
 WORKDIR /tmp
-ENTRYPOINT ["java","HelloWorld"]
+CMD ["java", "-jar", "Floatilla.jar"]
