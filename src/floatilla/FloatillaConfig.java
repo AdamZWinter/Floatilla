@@ -7,6 +7,7 @@ public class FloatillaConfig {
     private String myHostname;
     private int listeningPort;
     private int peerCountLimit;
+    private int maxResponseTime;
     private Set<PeerSocket> seeds;
 
     //for local test environment
