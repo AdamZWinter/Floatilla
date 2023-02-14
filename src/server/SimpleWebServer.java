@@ -1,5 +1,9 @@
 package server;
 
+import floatilla.Collector;
+import floatilla.Floatilla;
+import floatilla.FloatillaConfig;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -10,7 +14,7 @@ import java.net.Socket;
  * Then hands off that client Socket to the WebService and waits for another
  */
 public class SimpleWebServer {
-    public static final int PORT = 8090;
+    //public static final int PORT = 8090;
     //public static final String WEB_ROOT = "H:\\school\\SDEV301Fall2022\\html";
 
     /**
@@ -18,8 +22,13 @@ public class SimpleWebServer {
      * @param args not used
      */
     public static void main(String[] args) {
+        FloatillaConfig config = new FloatillaConfig("config.json");
+        Floatilla floatilla = new Floatilla(config);
+        Thread collectorThread = new Thread(new Collector(floatilla));
+        collectorThread.start();
+
         //try (ServerSocket server = new ServerSocket(PORT, 0, InetAddress.getLoopbackAddress())) {
-        try (ServerSocket server = new ServerSocket(PORT)) {
+        try (ServerSocket server = new ServerSocket(config.getListeningPort())) {
             System.out.println("Server starting.....");
             for(;;){
                 Socket client = server.accept();

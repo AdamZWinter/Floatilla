@@ -1,0 +1,21 @@
+{
+  "myHostname": "localhost",
+  "listeningPort": 8090,
+  "secureConnections": false,
+  "peerCountLimit": 10,
+  "maxResponseTime": 5000,
+  "seeds": [
+    {
+    "hostname": "localhost",
+    "port": 8090
+    },
+    {"hostname": "other",
+      "port": 80
+    },
+    {"hostname": "other2",
+      "port": 80
+    }
+  ],
+  "rootCertAuthorities": ["placeholder01", "placeholder02", "placeholder03"],
+  "maxCertChainLength": 5
+}

@@ -13,6 +13,7 @@ public class Floatilla {
     private Set<PeerSocket> socketsNeedValidating;
 
     private FloatillaConfig config;
+    //private boolean hasNew;         //will be made true when new peers are identified that need validating //no just a method that checks things
 
     public Floatilla(FloatillaConfig config) {
         this.config = config;
@@ -20,55 +21,30 @@ public class Floatilla {
         this.peerSocketsValidated = new HashSet<>();
     }
 
-    public void validateSockets(){
+    public void stageReValidation(){
         if(!peerSocketsValidated.isEmpty()){
             this.socketsNeedValidating.addAll(this.peerSocketsValidated);
         }
-        Set<PeerSocket> currentlyValidating = this.socketsNeedValidating;
-        for (PeerSocket socket: currentlyValidating
-             ) {
-            testSocket(socket);
+    }
+
+    public void makeValidatingNewOnly(){
+        Iterator<PeerSocket> itr = getValidatingIterator();
+        while(itr.hasNext()){
+            if(peerSocketsValidated.contains(itr.next())){
+                itr.remove();
+            }
         }
     }
 
-    public void testSocket(PeerSocket socket){
-        System.out.println("Testing socket: "+socket.toString());
-        BufferedReader br = null;
-        try {
-            if (!config.useSecureConnections()) {
-                URL url = new URL("http://" + socket.getHostname() + ":" + socket.getPort());
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
-                con.setDoOutput(true);
-                con.setConnectTimeout(5000);
-                con.setReadTimeout(5000);
-                DataOutputStream out = new DataOutputStream(con.getOutputStream());
-                out.writeBytes("/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
-                out.flush();
-                out.close();
+    public FloatillaConfig getConfig(){
+        return config;
+    }
 
-                if (con.getResponseCode() == 200) {
-                    br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                    String strCurrentLine;
-                    while ((strCurrentLine = br.readLine()) != null) {
-                        System.out.println(strCurrentLine);
-                    }
-                } else {
-                    br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-                    String strCurrentLine;
-                    while ((strCurrentLine = br.readLine()) != null) {
-                        System.out.println(strCurrentLine);
-                    }
-                }
-            } else {
-                //use https
-            }
+    public Iterator<PeerSocket> getValidatingIterator(){
+        return socketsNeedValidating.iterator();
+    }
 
-        } catch (SocketTimeoutException e){
-            System.out.println("Connection timed out.");
-            //handle this timeout by removing this socket from the Set
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public Iterator<PeerSocket> getValidatedIterator(){
+        return peerSocketsValidated.iterator();
     }
 }
