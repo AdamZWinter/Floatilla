@@ -68,16 +68,16 @@ public class Collector implements Runnable {
         BufferedReader br = null;
         try {
             if (!config.useSecureConnections()) {
-                URL url = new URL("http://" + socket.getHostname() + ":" + socket.getPort());
+                URL url = new URL("http://" + socket.getHostname() + ":" + socket.getPort()+"/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
-                con.setDoOutput(true);
+                //con.setDoOutput(true);
                 con.setConnectTimeout(5000);
                 con.setReadTimeout(5000);
-                DataOutputStream out = new DataOutputStream(con.getOutputStream());
-                out.writeBytes("/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
-                out.flush();
-                out.close();
+                //DataOutputStream out = new DataOutputStream(con.getOutputStream());
+                //out.writeBytes("/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
+                //out.flush();
+                //out.close();
 
                 if (con.getResponseCode() == 200) {
                     br = new BufferedReader(new InputStreamReader(con.getInputStream()));

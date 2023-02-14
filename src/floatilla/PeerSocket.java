@@ -60,6 +60,6 @@ public class PeerSocket {
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof PeerSocket) && this.equals(obj);
+        return (obj instanceof PeerSocket) && this.hashCode() == obj.hashCode();
     }
 }

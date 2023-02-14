@@ -1,5 +1,5 @@
 {
-  "myHostname": "localhost",
+  "myHostname": "bestNode",
   "listeningPort": 8090,
   "secureConnections": false,
   "peerCountLimit": 10,
@@ -9,11 +9,11 @@
     "hostname": "localhost",
     "port": 8090
     },
-    {"hostname": "other",
-      "port": 80
+    {"hostname": "localhost",
+      "port": 8090
     },
-    {"hostname": "other2",
-      "port": 80
+    {"hostname": "localhost",
+      "port": 8090
     }
   ],
   "rootCertAuthorities": ["placeholder01", "placeholder02", "placeholder03"],
