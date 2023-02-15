@@ -5,13 +5,9 @@ import floatilla.PeerSocket;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.ProtocolException;
 import java.net.Socket;
-import java.net.URL;
 import java.util.*;
 
 public class WebService implements Runnable{
@@ -88,37 +84,8 @@ public class WebService implements Runnable{
         }
     }
 
-    //Reads the file with the base path set by the SimpleWebServer WEB_ROOT
-    //and the full path created by adding the requestPath per the GET request
-    //returns the lines of the file as it reads them
-    //if no file is specified, then the lines of index.html (found in the WEB_ROOT) are returned
     private void performService(String command, String requestPath) throws IOException {
-        //String encodedString = Base64.getEncoder().encodeToString("My test string".getBytes());
-        //sendToClient.println(encodedString);
-        //String encodedString = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8bWV0YSBodHRwLWVxdWl2PSJDb250ZW50LVR5cGUiIGNvbnRlbnQ9InRleHQvaHRtbDsgY2hhcnNldD11dGYtOCI+ICAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wIj4gIAogICAgPHRpdGxlPldlbGNvbWU8L3RpdGxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGRpdj4KICAgICAgICA8aDE+V2VsY29tZSE8L2gxPgogICAgICAgIDxoMT5CaWVudmVuaWRvcyE8L2gxPgogICAgPC9kaXY+CiAgICA8aDE+VGhhbmtzIGZvciB2aXNpdGluZyE8L2gxPgo8L2JvZHk+CjwvaHRtbD4=";
-        //System.out.println(encodedString);
-        //System.out.println(new String(Base64.getDecoder().decode(encodedString)));
-        //sendToClient.println(new String(Base64.getDecoder().decode(encodedString)));
-
-//        String filePath = SimpleWebServer.WEB_ROOT;
-//        if(requestPath.compareTo("/") == 0){
-//            filePath = filePath + "\\index.html";
-//        }else{
-//            filePath = filePath + requestPath;
-//        }
-//
-//        try {
-//            Scanner fileIn = new Scanner(new File(filePath));
-//            //fileIn.useDelimiter("");
-//            while(fileIn.hasNext()){
-//                sendToClient.println(fileIn.nextLine());
-//            }//end while
-//        } catch (FileNotFoundException e) {
-//            System.out.println("File not found. ");
-//            sendToClient.println("404 File Not Found: "+filePath);
-//        }
-
-        floatilla.fakeValidateAll();
+        //floatilla.fakeValidateAll();
         Iterator<PeerSocket> flitr = floatilla.getValidatedIterator();
         //Map<String, Integer> socketMap = new HashMap<>();
         JSONArray peersArray = new JSONArray();

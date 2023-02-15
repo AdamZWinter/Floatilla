@@ -84,7 +84,7 @@ public class PeerSocket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(hostname, port);
+        return Objects.hash(protocol, hostname, port, usePath());
     }
 
     @Override
