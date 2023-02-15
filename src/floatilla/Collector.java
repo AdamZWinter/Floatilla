@@ -87,53 +87,67 @@ public class Collector implements Runnable {
         BufferedReader br = null;
         StringBuilder strBuilder = new StringBuilder();
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append("http://" + socket.getHostname());
+
+        if (socket.getProtocol().compareTo("http") == 0) {
+            urlBuilder.append("http://");
+        } else if(socket.getProtocol().compareTo("https") == 0){
+            urlBuilder.append("https://");
+        }else{
+            System.out.println("Protocol not supported.");
+            return false;
+        }
+        urlBuilder.append(socket.getHostname());
+        if(socket.getPort() != 80 && socket.getPort() != 443 && socket.usePort()){
+            urlBuilder.append(":");
+            urlBuilder.append(socket.getPort());
+        }
+        if(socket.usePath()){
+            urlBuilder.append(socket.getPath());
+        }
+        urlBuilder.append("?config=");
+        urlBuilder.append(config.getHash());
+        urlBuilder.append("&host=");
+        urlBuilder.append(config.getMyHostname());
+        if(config.useMyPort){
+            urlBuilder.append("&port=");
+            urlBuilder.append(config.getListeningPort());
+        }else{
+            urlBuilder.append("&port=");
+            urlBuilder.append(0);
+        }
+        if(config.useMyPath){
+            urlBuilder.append("&path=");
+            urlBuilder.append(config.getUrlPath());
+        }
+
         Date date = new Date();
         Long startTime = date.getTime();
         try {
-            if (!config.useSecureConnections()) {
-                if(socket.getPort() != 80 && socket.getPort() != 443 && socket.usePort()){
-                    urlBuilder.append(":" + socket.getPort());
-                }
-                if(socket.usePath()){
-                    urlBuilder.append(socket.getPath());
-                }
-                urlBuilder.append("?config=" + config.getHash());
-                urlBuilder.append("&host=" + config.getMyHostname());
-                if(config.useMyPort){
-                    urlBuilder.append("&port=" + config.getListeningPort());
-                }
-                if(config.useMyPath){
-                    urlBuilder.append("&path=" + config.getUrlPath());
-                }
-                URL url = new URL(urlBuilder.toString());
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
-                //con.setDoOutput(true);
-                con.setConnectTimeout(5000);
-                con.setReadTimeout(5000);
-                //DataOutputStream out = new DataOutputStream(con.getOutputStream());
-                //out.writeBytes("/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
-                //out.flush();
-                //out.close();
+            URL url = new URL(urlBuilder.toString());
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            //con.setDoOutput(true);
+            con.setConnectTimeout(5000);
+            con.setReadTimeout(5000);
+            //DataOutputStream out = new DataOutputStream(con.getOutputStream());
+            //out.writeBytes("/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
+            //out.flush();
+            //out.close();
 
-                if (con.getResponseCode() == 200) {
-                    br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                    String strCurrentLine;
-                    while ((strCurrentLine = br.readLine()) != null) {
-                        strBuilder.append(strCurrentLine);
-                        System.out.println(strCurrentLine);
-                    }
-                } else {
-                    br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-                    String strCurrentLine;
-                    while ((strCurrentLine = br.readLine()) != null) {
-                        System.out.println(strCurrentLine);
-                    }
-                    return false;
+            if (con.getResponseCode() == 200) {
+                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String strCurrentLine;
+                while ((strCurrentLine = br.readLine()) != null) {
+                    strBuilder.append(strCurrentLine);
+                    System.out.println(strCurrentLine);
                 }
             } else {
-                //use https
+                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                String strCurrentLine;
+                while ((strCurrentLine = br.readLine()) != null) {
+                    System.out.println(strCurrentLine);
+                }
+                return false;
             }
 
         } catch (SocketTimeoutException e){
@@ -173,17 +187,18 @@ public class Collector implements Runnable {
             //System.out.println("Index[0][0]: " + jsonArray.getJSONArray(0).getString(0));
             for(int i = 0; i < jsonArray.length(); i++){
                 JSONArray singlePeerArray = jsonArray.getJSONArray(i);
-                if(singlePeerArray.length() != 2 && singlePeerArray.length() != 3){
-                    System.out.println("Error: single peer array length must be 2 or 3");
+                if(singlePeerArray.length() != 3 && singlePeerArray.length() != 4){
+                    System.out.println("Error: single peer array length must be 3 or 4");
                     return false;
                 }
-                String hostname = singlePeerArray.getString(0);
-                int port = singlePeerArray.getInt(1);
+                String protocol = singlePeerArray.getString(0);
+                String hostname = singlePeerArray.getString(1);
+                int port = singlePeerArray.getInt(2);
                 //TODO:  Add validation
-                PeerSocket peerSocket = new PeerSocket(hostname, port);
+                PeerSocket peerSocket = new PeerSocket(protocol, hostname, port);
 
-                if(singlePeerArray.length() == 3){
-                    String path = singlePeerArray.getString(2);
+                if(singlePeerArray.length() == 4){
+                    String path = singlePeerArray.getString(3);
                     peerSocket.setPath(path);
                 }
 

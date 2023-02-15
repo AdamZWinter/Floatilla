@@ -9,15 +9,12 @@ import java.util.*;
 
 public class FloatillaConfig {
 
+    private String myProtocol;
     private String myHostname;
     private int listeningPort;
     private String urlPath;
-
     boolean useMyPort;
     boolean useMyPath;
-
-    //for local test environment
-    private boolean secureConnections;
     private int peerCountLimit;
     private int maxResponseTime;
     private Set<PeerSocket> seeds;
@@ -41,12 +38,12 @@ public class FloatillaConfig {
 
         JSONObject jsonObject = new JSONObject(stringBuilder.toString());
 
+        this.myProtocol = jsonObject.getString("myProtocol");
         this.myHostname = jsonObject.getString("myHostname");
         this.listeningPort = jsonObject.getInt("listeningPort");
         this.urlPath = jsonObject.getString("urlPath");
         this.useMyPort = jsonObject.getBoolean("useMyPort");
         this.useMyPath = jsonObject.getBoolean("useMyPath");
-        this.secureConnections = jsonObject.getBoolean("secureConnections");
         this.peerCountLimit = jsonObject.getInt("peerCountLimit");
         this.maxResponseTime = jsonObject.getInt("maxResponseTime");
 
@@ -55,7 +52,10 @@ public class FloatillaConfig {
         for(Object seed : jsonArraySeeds){
             //System.out.println(seed);
             JSONObject jsonObjectSeed = new JSONObject(seed.toString());
-            PeerSocket peerSocket = new PeerSocket(jsonObjectSeed.getString("hostname"), jsonObjectSeed.getInt("port"));
+            PeerSocket peerSocket = new PeerSocket();
+            peerSocket.setProtocol(jsonObjectSeed.getString("protocol"));
+            peerSocket.setHostname(jsonObjectSeed.getString("hostname"));
+            peerSocket.setPort(jsonObjectSeed.getInt("port"));
             if(jsonObjectSeed.keySet().contains("path")){
                 peerSocket.setPath(jsonObjectSeed.getString("path"));
             }
@@ -106,10 +106,6 @@ public class FloatillaConfig {
 
     public void setSeeds(Set<PeerSocket> seeds) {
         this.seeds = seeds;
-    }
-
-    public boolean useSecureConnections(){
-        return secureConnections;
     }
 
     public Set<String> getRootCertAuthorities(){return rootCertAuthorities;}

@@ -3,19 +3,28 @@ package floatilla;
 import java.util.Objects;
 
 public class PeerSocket {
+    String protocol;
     String hostname;
     int port;
-
     String path;    //starts with forward slash /
     int responseTime;
     boolean failedConnection;
 
-    public PeerSocket(String hostname, int port) {
+    public PeerSocket(String protocol, String hostname, int port) {
+        this.protocol = protocol;
         this.hostname = hostname;
         this.port = port;
     }
 
     public PeerSocket() {
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public String getHostname() {

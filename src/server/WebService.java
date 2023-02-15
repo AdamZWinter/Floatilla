@@ -93,15 +93,6 @@ public class WebService implements Runnable{
     //returns the lines of the file as it reads them
     //if no file is specified, then the lines of index.html (found in the WEB_ROOT) are returned
     private void performService(String command, String requestPath) throws IOException {
-        //sendToClient.println("Verb: "+command+"  requestPath: "+ requestPath);
-        //sendToClient.println("Thank you, come again.");
-        //URL url1 = new URL("https://i.natgeofe.com/k/9acd2bad-fb0e-43a8-935d-ec0aefc60c2f/monarch-butterfly-grass_4x3.jpg");
-//        sendToClient.println("<html><body>" +
-//                "<p><h1>Butterfly</h1></p>" +
-//                "<p><h3>This is a monarch butterfly.</h3></p>" +
-//                "<img heigh=500 width=500 src=\"https://i.natgeofe.com/k/9acd2bad-fb0e-43a8-935d-ec0aefc60c2f/monarch-butterfly-grass_4x3.jpg\">" +
-//                "</body></html>");
-//        System.out.println("Verb: "+command+"  requestPath: "+ requestPath);
         //String encodedString = Base64.getEncoder().encodeToString("My test string".getBytes());
         //sendToClient.println(encodedString);
         //String encodedString = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8bWV0YSBodHRwLWVxdWl2PSJDb250ZW50LVR5cGUiIGNvbnRlbnQ9InRleHQvaHRtbDsgY2hhcnNldD11dGYtOCI+ICAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wIj4gIAogICAgPHRpdGxlPldlbGNvbWU8L3RpdGxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGRpdj4KICAgICAgICA8aDE+V2VsY29tZSE8L2gxPgogICAgICAgIDxoMT5CaWVudmVuaWRvcyE8L2gxPgogICAgPC9kaXY+CiAgICA8aDE+VGhhbmtzIGZvciB2aXNpdGluZyE8L2gxPgo8L2JvZHk+CjwvaHRtbD4=";
@@ -135,10 +126,11 @@ public class WebService implements Runnable{
             PeerSocket socket = flitr.next();
             JSONArray jsonArray = new JSONArray();
             //JSONObject socketObject = new JSONObject();
-            jsonArray.put(0, socket.getHostname());
-            jsonArray.put(1, socket.getPort());
+            jsonArray.put(0, socket.getProtocol());
+            jsonArray.put(1, socket.getHostname());
+            jsonArray.put(2, socket.getPort());
             if(socket.usePath()){
-                jsonArray.put(2, socket.getPath());
+                jsonArray.put(3, socket.getPath());
             }
 
             peersArray.put(jsonArray);
