@@ -5,6 +5,8 @@ import java.util.Objects;
 public class PeerSocket {
     String hostname;
     int port;
+
+    String path;    //starts with forward slash /
     int responseTime;
     boolean failedConnection;
 
@@ -30,6 +32,24 @@ public class PeerSocket {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    //path string should start with a forward slash
+    //and end on the resource (not a directory, does not end with slash)
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public boolean usePort(){
+        return port != 0;
+    }
+
+    public boolean usePath(){
+        return path != null;
     }
 
     public int getResponseTime() {

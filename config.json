@@ -1,19 +1,26 @@
 {
   "myHostname": "bestNode",
   "listeningPort": 8090,
+  "urlPath": "/FloatillaTest",
+  "useMyPort": true,
+  "useMyPath": false,
   "secureConnections": false,
   "peerCountLimit": 10,
   "maxResponseTime": 5000,
   "seeds": [
     {
-    "hostname": "localhost",
-    "port": 8090
-    },
-    {"hostname": "localhost",
+      "hostname": "localhost",
       "port": 8090
     },
-    {"hostname": "localhost",
-      "port": 8090
+    {
+      "hostname": "127.0.0.1",
+      "port": 8090,
+      "path": "/path"
+    },
+    {
+      "hostname": "127.0.0.2",
+      "port": 8090,
+      "path": "/path"
     }
   ],
   "rootCertAuthorities": ["placeholder01", "placeholder02", "placeholder03"],

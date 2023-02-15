@@ -47,4 +47,30 @@ public class Floatilla {
     public Iterator<PeerSocket> getValidatedIterator(){
         return peerSocketsValidated.iterator();
     }
+
+    public void fakeValidateAll(){
+        this.peerSocketsValidated.addAll(this.socketsNeedValidating);
+    }
+
+    public void queueForValidation(PeerSocket socket){
+        socketsNeedValidating.add(socket);
+    }
+
+    public void addValidatedSocket(PeerSocket socket){
+        peerSocketsValidated.add(socket);
+    }
+
+    //for thread safety while validating
+    public Set<PeerSocket> deepCopyValidationSet(){
+        Set<PeerSocket> deepishCopy = new HashSet<>();
+        Iterator<PeerSocket> itr = socketsNeedValidating.iterator();
+        while(itr.hasNext()){
+            deepishCopy.add(itr.next());
+        }
+        return deepishCopy;
+    }
+
+    public void clearValidationSet(){
+        socketsNeedValidating.clear();
+    }
 }

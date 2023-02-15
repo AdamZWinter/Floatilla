@@ -11,6 +11,10 @@ public class FloatillaConfig {
 
     private String myHostname;
     private int listeningPort;
+    private String urlPath;
+
+    boolean useMyPort;
+    boolean useMyPath;
 
     //for local test environment
     private boolean secureConnections;
@@ -39,6 +43,9 @@ public class FloatillaConfig {
 
         this.myHostname = jsonObject.getString("myHostname");
         this.listeningPort = jsonObject.getInt("listeningPort");
+        this.urlPath = jsonObject.getString("urlPath");
+        this.useMyPort = jsonObject.getBoolean("useMyPort");
+        this.useMyPath = jsonObject.getBoolean("useMyPath");
         this.secureConnections = jsonObject.getBoolean("secureConnections");
         this.peerCountLimit = jsonObject.getInt("peerCountLimit");
         this.maxResponseTime = jsonObject.getInt("maxResponseTime");
@@ -49,6 +56,9 @@ public class FloatillaConfig {
             //System.out.println(seed);
             JSONObject jsonObjectSeed = new JSONObject(seed.toString());
             PeerSocket peerSocket = new PeerSocket(jsonObjectSeed.getString("hostname"), jsonObjectSeed.getInt("port"));
+            if(jsonObjectSeed.keySet().contains("path")){
+                peerSocket.setPath(jsonObjectSeed.getString("path"));
+            }
             this.seeds.add(peerSocket);
         }
 
@@ -59,6 +69,8 @@ public class FloatillaConfig {
         for (Object certAuth : jsonArray) {
             this.rootCertAuthorities.add((String)certAuth);
         }
+
+        this.maxCertChainLength = jsonObject.getInt("maxCertChainLength");
 
     }
 
@@ -78,6 +90,7 @@ public class FloatillaConfig {
     public void setListeningPort(int listeningPort) {
         this.listeningPort = listeningPort;
     }
+    public String getUrlPath(){return urlPath;}
 
     public int getPeerCountLimit() {
         return peerCountLimit;
@@ -100,4 +113,8 @@ public class FloatillaConfig {
     }
 
     public Set<String> getRootCertAuthorities(){return rootCertAuthorities;}
+
+    public Integer getHash(){
+        return Objects.hash(urlPath, rootCertAuthorities, maxCertChainLength);
+    }
 }

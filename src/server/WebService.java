@@ -1,19 +1,23 @@
 package server;
 
+import floatilla.Floatilla;
+import floatilla.PeerSocket;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ProtocolException;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class WebService implements Runnable{
 
     Socket client;
+    Floatilla floatilla;
     Scanner readFromClient;
     PrintWriter sendToClient;
 
@@ -21,9 +25,10 @@ public class WebService implements Runnable{
      * Constructor sets the client Socket
      * @param client Socket
      */
-    public WebService(Socket client){
+    public WebService(Socket client, Floatilla floatilla){
 
         this.client = client;
+        this.floatilla = floatilla;
 
     }
 
@@ -88,7 +93,7 @@ public class WebService implements Runnable{
     //returns the lines of the file as it reads them
     //if no file is specified, then the lines of index.html (found in the WEB_ROOT) are returned
     private void performService(String command, String requestPath) throws IOException {
-        sendToClient.println("Verb: "+command+"  requestPath: "+ requestPath);
+        //sendToClient.println("Verb: "+command+"  requestPath: "+ requestPath);
         //sendToClient.println("Thank you, come again.");
         //URL url1 = new URL("https://i.natgeofe.com/k/9acd2bad-fb0e-43a8-935d-ec0aefc60c2f/monarch-butterfly-grass_4x3.jpg");
 //        sendToClient.println("<html><body>" +
@@ -96,7 +101,7 @@ public class WebService implements Runnable{
 //                "<p><h3>This is a monarch butterfly.</h3></p>" +
 //                "<img heigh=500 width=500 src=\"https://i.natgeofe.com/k/9acd2bad-fb0e-43a8-935d-ec0aefc60c2f/monarch-butterfly-grass_4x3.jpg\">" +
 //                "</body></html>");
-        System.out.println("Verb: "+command+"  requestPath: "+ requestPath);
+//        System.out.println("Verb: "+command+"  requestPath: "+ requestPath);
         //String encodedString = Base64.getEncoder().encodeToString("My test string".getBytes());
         //sendToClient.println(encodedString);
         //String encodedString = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8bWV0YSBodHRwLWVxdWl2PSJDb250ZW50LVR5cGUiIGNvbnRlbnQ9InRleHQvaHRtbDsgY2hhcnNldD11dGYtOCI+ICAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wIj4gIAogICAgPHRpdGxlPldlbGNvbWU8L3RpdGxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGRpdj4KICAgICAgICA8aDE+V2VsY29tZSE8L2gxPgogICAgICAgIDxoMT5CaWVudmVuaWRvcyE8L2gxPgogICAgPC9kaXY+CiAgICA8aDE+VGhhbmtzIGZvciB2aXNpdGluZyE8L2gxPgo8L2JvZHk+CjwvaHRtbD4=";
@@ -121,6 +126,32 @@ public class WebService implements Runnable{
 //            System.out.println("File not found. ");
 //            sendToClient.println("404 File Not Found: "+filePath);
 //        }
+
+        floatilla.fakeValidateAll();
+        Iterator<PeerSocket> flitr = floatilla.getValidatedIterator();
+        //Map<String, Integer> socketMap = new HashMap<>();
+        JSONArray peersArray = new JSONArray();
+        while (flitr.hasNext()){
+            PeerSocket socket = flitr.next();
+            JSONArray jsonArray = new JSONArray();
+            //JSONObject socketObject = new JSONObject();
+            jsonArray.put(0, socket.getHostname());
+            jsonArray.put(1, socket.getPort());
+            if(socket.usePath()){
+                jsonArray.put(2, socket.getPath());
+            }
+
+            peersArray.put(jsonArray);
+
+            //socketMap.put(socket.getHostname(), socket.getPort());
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("config", floatilla.getConfig().getHash());
+        jsonObject.put("numPeers", peersArray.length());
+        jsonObject.put("peers", peersArray);
+
+        sendToClient.println(jsonObject.toString());
 
         sendToClient.flush();
         sendToClient.close();

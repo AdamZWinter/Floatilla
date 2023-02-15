@@ -1,7 +1,12 @@
 package floatilla;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.*;
+import java.security.PrivilegedExceptionAction;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
@@ -21,15 +26,29 @@ public class Collector implements Runnable {
         System.out.println("Collector running.");
         floatilla.stageReValidation();
         while(true){
-            Iterator<PeerSocket> currentlyValidating = floatilla.getValidatingIterator();
+            // not a deep copy of the sockets, just the set of sockets
+            Set<PeerSocket> deepishCopy = floatilla.deepCopyValidationSet();
+            floatilla.clearValidationSet();
+            Iterator<PeerSocket> currentlyValidating = deepishCopy.iterator();
             while(currentlyValidating.hasNext()){
                 PeerSocket currentSocket = currentlyValidating.next();
-                testSocket(currentSocket);
+                if(testSocket(currentSocket)){
+                    floatilla.addValidatedSocket(currentSocket);
+                    currentlyValidating.remove();
+                }else{
+                    currentlyValidating.remove();
+                }
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+            }
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
 
         }
@@ -63,12 +82,31 @@ public class Collector implements Runnable {
 //        }
     }
 
-    public void testSocket(PeerSocket socket){
+    public boolean testSocket(PeerSocket socket){
         System.out.println("Testing socket: "+socket.toString());
         BufferedReader br = null;
+        StringBuilder strBuilder = new StringBuilder();
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append("http://" + socket.getHostname());
+        Date date = new Date();
+        Long startTime = date.getTime();
         try {
             if (!config.useSecureConnections()) {
-                URL url = new URL("http://" + socket.getHostname() + ":" + socket.getPort()+"/floatillaTestChannel?host=" + config.getMyHostname() + "&port=" + config.getListeningPort());
+                if(socket.getPort() != 80 && socket.getPort() != 443 && socket.usePort()){
+                    urlBuilder.append(":" + socket.getPort());
+                }
+                if(socket.usePath()){
+                    urlBuilder.append(socket.getPath());
+                }
+                urlBuilder.append("?config=" + config.getHash());
+                urlBuilder.append("&host=" + config.getMyHostname());
+                if(config.useMyPort){
+                    urlBuilder.append("&port=" + config.getListeningPort());
+                }
+                if(config.useMyPath){
+                    urlBuilder.append("&path=" + config.getUrlPath());
+                }
+                URL url = new URL(urlBuilder.toString());
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 //con.setDoOutput(true);
@@ -83,6 +121,7 @@ public class Collector implements Runnable {
                     br = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     String strCurrentLine;
                     while ((strCurrentLine = br.readLine()) != null) {
+                        strBuilder.append(strCurrentLine);
                         System.out.println(strCurrentLine);
                     }
                 } else {
@@ -91,6 +130,7 @@ public class Collector implements Runnable {
                     while ((strCurrentLine = br.readLine()) != null) {
                         System.out.println(strCurrentLine);
                     }
+                    return false;
                 }
             } else {
                 //use https
@@ -102,6 +142,59 @@ public class Collector implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        Date dateEnd = new Date();
+        Long endTime = dateEnd.getTime();
+        int responseTime = (int) (endTime - startTime);
+        socket.setResponseTime(responseTime);
+
+        String response = strBuilder.toString();
+        JSONObject jsonObject = new JSONObject(response);
+        if(jsonObject.getInt("config") != config.getHash()){
+            System.out.println("Configuration Mismatch!");
+            return false;
+        }
+
+//        for (String key: jsonObject.keySet()) {
+//            System.out.println("key: "+key + " Value: "+ jsonObject.get(key));
+//        }
+
+
+
+        JSONArray jsonArray = new JSONArray(jsonObject.getJSONArray("peers"));
+        if(jsonObject.getInt("numPeers") != jsonArray.length()){
+            //Sanity check failed
+            System.out.println("Peers reported " + jsonObject.getInt("numPeers")
+                    + "but found array length: " + jsonArray.length());
+            return false;
+        }
+        //System.out.println(jsonArray);
+        if(!jsonArray.isEmpty()){
+            //System.out.println("Index[0][0]: " + jsonArray.getJSONArray(0).getString(0));
+            for(int i = 0; i < jsonArray.length(); i++){
+                JSONArray singlePeerArray = jsonArray.getJSONArray(i);
+                if(singlePeerArray.length() != 2 && singlePeerArray.length() != 3){
+                    System.out.println("Error: single peer array length must be 2 or 3");
+                    return false;
+                }
+                String hostname = singlePeerArray.getString(0);
+                int port = singlePeerArray.getInt(1);
+                //TODO:  Add validation
+                PeerSocket peerSocket = new PeerSocket(hostname, port);
+
+                if(singlePeerArray.length() == 3){
+                    String path = singlePeerArray.getString(2);
+                    peerSocket.setPath(path);
+                }
+
+                floatilla.queueForValidation(peerSocket);
+            }
+        }else{
+            //return false; ???????
+        }
+
+        return true;
+
     }
 
 }
