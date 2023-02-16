@@ -31,18 +31,19 @@ public class Collector implements Runnable {
             System.out.println("---------------------------------------------------------------------");
             System.out.println("Start Round:");
             // not a deep copy of the sockets, just the set of sockets
-            Set<PeerSocket> deepishCopy = floatilla.deepCopyValidationSet();
-            //System.out.println("This should NOT be empty:" + floatilla.getValidationSet().toString());
+            Set<PeerSocket> shallowCopy = floatilla.shallowCopyValidationSet();
             floatilla.clearValidationSet();
-            //System.out.println("This should be empty:" + floatilla.getValidationSet().toString());
-            Iterator<PeerSocket> currentlyValidating = deepishCopy.iterator();
+            Iterator<PeerSocket> currentlyValidating = shallowCopy.iterator();
+            System.out.println(currentlyValidating.hasNext());
             while(currentlyValidating.hasNext()){
                 PeerSocket currentSocket = currentlyValidating.next();
-                if(testSocket(currentSocket)){
-                    floatilla.addValidatedSocket(currentSocket);
-                    currentlyValidating.remove();
-                }else{
-                    currentlyValidating.remove();
+                if(!floatilla.contains(currentSocket) && !floatilla.isBlackListed(currentSocket)){
+                    if(testSocket(currentSocket)){
+                        floatilla.addValidatedSocket(currentSocket);
+                        //currentlyValidating.remove();
+                    }else{
+                        //currentlyValidating.remove();
+                    }
                 }
                 try {
                     Thread.sleep(2000);
@@ -50,16 +51,20 @@ public class Collector implements Runnable {
                     throw new RuntimeException(e);
                 }
             }
+
             if(round == 1){
                 floatilla.removeSeeds();
             }
+
             if(round == 101){
                 System.out.println("100 collection rounds completed");
+                floatilla.stageReValidation();
                 round = 2;
             }
 
-            if(round > 5 && floatilla.hasEmptyValidationSet()){
+            if(round > 2 && floatilla.hasEmptyValidationSet()){
                 System.out.println("No new sockets to validate.  Sleeping....");
+                System.out.println("Validated Set: "+ floatilla);
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -69,34 +74,6 @@ public class Collector implements Runnable {
             round++;
 
         }
-
-
-
-        //Scanner console = new Scanner(System.in);
-        //String text = console.nextLine();
-        //try(Socket server = new Socket("18.237.141.225", 8090)){
-//        try(Socket server = new Socket("localhost", 8090)){
-//
-//            Scanner fromServer = new Scanner(server.getInputStream());
-//            PrintWriter toServer = new PrintWriter(server.getOutputStream(), true);
-//            toServer.println(text);
-//
-//            while(fromServer.hasNextLine()){
-//                System.out.println(fromServer.nextLine());
-//            }
-//        } catch (UnknownHostException e) {
-//            throw new RuntimeException(e);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-    }
-
-    public void validateSockets(){
-//        Set<PeerSocket> currentlyValidating = floatilla.;
-//        for (PeerSocket socket: currentlyValidating
-//        ) {
-//            testSocket(socket);
-//        }
     }
 
     public boolean testSocket(PeerSocket socket){
@@ -190,8 +167,6 @@ public class Collector implements Runnable {
 //            System.out.println("key: "+key + " Value: "+ jsonObject.get(key));
 //        }
 
-
-
         JSONArray jsonArray = new JSONArray(jsonObject.getJSONArray("peers"));
         if(jsonObject.getInt("numPeers") != jsonArray.length()){
             //Sanity check failed
@@ -219,7 +194,9 @@ public class Collector implements Runnable {
                     peerSocket.setPath(path);
                 }
 
-                System.out.println(peerSocket);
+//                System.out.println(peerSocket);
+//                System.out.println("Queueing for validation:" + peerSocket);
+//                floatilla.queueForValidation(peerSocket);
 
                 //this checks the third-party sockets returned by the socket being tested
                 //if the third-party sockets are ones we have already validated or are blacklisted
@@ -228,7 +205,7 @@ public class Collector implements Runnable {
                     System.out.println("Queueing for validation:" + peerSocket);
                     floatilla.queueForValidation(peerSocket);
                 }else{
-                    System.out.println("This should not happen.");
+                    System.out.println("Socket already validated, or blacklisted.");
                     floatilla.queueForValidation(peerSocket);
                 }
 

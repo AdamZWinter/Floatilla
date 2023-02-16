@@ -13,7 +13,6 @@ public class Floatilla {
     private Set<PeerSocket> socketsNeedValidating;
     private Set<PeerSocket> blackList;      //but yeah, it's a Set
     private FloatillaConfig config;
-    //private boolean hasNew;         //will be made true when new peers are identified that need validating //no just a method that checks things
 
     public Floatilla(FloatillaConfig config) {
         this.config = config;
@@ -29,14 +28,14 @@ public class Floatilla {
         }
     }
 
-    public void makeValidatingNewOnly(){
-        Iterator<PeerSocket> itr = getValidatingIterator();
-        while(itr.hasNext()){
-            if(peerSocketsValidated.contains(itr.next())){
-                itr.remove();
-            }
-        }
-    }
+//    public void makeValidatingNewOnly(){
+//        Iterator<PeerSocket> itr = getValidatingIterator();
+//        while(itr.hasNext()){
+//            if(peerSocketsValidated.contains(itr.next())){
+//                itr.remove();
+//            }
+//        }
+//    }
 
     public FloatillaConfig getConfig(){
         return config;
@@ -63,20 +62,19 @@ public class Floatilla {
     }
 
     //for thread safety while validating
-    public Set<PeerSocket> deepCopyValidationSet(){
-        Set<PeerSocket> deepishCopy = new HashSet<>();
+    public Set<PeerSocket> shallowCopyValidationSet(){
+        Set<PeerSocket> shallowCopy = new HashSet<>();
         Iterator<PeerSocket> itr = socketsNeedValidating.iterator();
         while(itr.hasNext()){
-            deepishCopy.add(itr.next());
+            shallowCopy.add(itr.next());
         }
-        return deepishCopy;
+        return shallowCopy;
     }
 
+    // using the clear method removes the elements from existence if nothing else is pointing to them
     public void clearValidationSet(){
-        socketsNeedValidating.clear();
+        socketsNeedValidating = new HashSet<>();
     }
-
-    public Set<PeerSocket> getValidationSet(){return socketsNeedValidating;}
 
     public void removeSeeds(){
         Set<PeerSocket> seeds = config.getSeeds();
@@ -100,5 +98,10 @@ public class Floatilla {
 
     public boolean isBlackListed(PeerSocket socket){
         return blackList.contains(socket);
+    }
+
+    @Override
+    public String toString(){
+        return peerSocketsValidated.toString();
     }
 }

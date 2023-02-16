@@ -27,7 +27,7 @@ public class FloatillaConfig {
         StringBuilder stringBuilder = new StringBuilder();
 
         try {
-            Scanner fileIn = new Scanner(new File("config.json"));
+            Scanner fileIn = new Scanner(new File(filename));
             //fileIn.useDelimiter("");
             while(fileIn.hasNextLine()){
                 stringBuilder.append(fileIn.nextLine());
@@ -65,7 +65,6 @@ public class FloatillaConfig {
 
         this.rootCertAuthorities = new HashSet<>();
         JSONArray jsonArray = jsonObject.getJSONArray("rootCertAuthorities");
-        //List<String> rootCertAuthArray = new ArrayList<>();
         for (Object certAuth : jsonArray) {
             this.rootCertAuthorities.add((String)certAuth);
         }
