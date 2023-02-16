@@ -1,3 +1,3 @@
 # Floatilla
 
-Empirically, four nodes uses roughly 136 Mb of system RAM.
+Empirically, uses roughly 30 Mb of system RAM per node.
