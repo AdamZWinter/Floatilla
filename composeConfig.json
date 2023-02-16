@@ -1,6 +1,6 @@
 {
   "myProtocol": "http",
-  "myHostname": "127.0.0.3",
+  "myHostname": "{{hostname}}",
   "listeningPort": 8090,
   "urlPath": "/FloatillaTest",
   "useMyPort": true,
@@ -12,7 +12,7 @@
       "protocol": "https",
       "hostname": "raw.githubusercontent.com",
       "port": 0,
-      "path": "/AdamZWinter/Floatilla/main/seeds.json"
+      "path": "/AdamZWinter/Floatilla/main/composeSeeds.json"
     }
   ],
   "rootCertAuthorities": ["placeholder01", "placeholder02", "placeholder03"],

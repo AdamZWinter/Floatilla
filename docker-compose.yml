@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  webserver01:
-    image: "simplewebserver:0.01"
+  node01:
+    image: "floatilla:0.01"
     restart: unless-stopped
 #    depends_on:
 #      - mariadb
@@ -10,59 +10,27 @@ services:
 #      - '8091:8090'
 
 
-  webserver02:
-    image: "simplewebserver:0.01"
+  node02:
+    image: "floatilla:0.01"
     restart: unless-stopped
-    #    depends_on:
-    #      - mariadb
+       depends_on:
+         - node01
 #    ports:
 #      - '8092:8090'
 
-  webserver03:
-    image: "simplewebserver:0.01"
+  node03:
+    image: "floatilla:0.01"
     restart: unless-stopped
-    #    depends_on:
-    #      - mariadb
+       depends_on:
+         - node02
 #    ports:
 #      - '8093:8090'
 
 
-  webserver04:
-    image: "simplewebserver:0.01"
+  node04:
+    image: "floatilla:0.01"
     restart: unless-stopped
-    #    depends_on:
-    #      - mariadb
+       depends_on:
+         - node03
 #    ports:
 #      - '8094:8090'
-
-
-
-#    links:
-#      - mariadb
-#    volumes:
-#      - ../html:/var/www/html:z
-#      - ../secrets:/var/www/secrets:z
-#      - ./scripts:/var/www/scripts:z
-#      - ./logs:/var/www/logs:z
-#  mariadb:
-#    image: "mariadb:latest"
-#    restart: unless-stopped
-#    volumes:
-#      - database-volume:/var/lib/mysql
-#    env_file:
-#      - ../secrets/variables.env
-#    ports:
-#      - '3306:3306'
-#  phpmyadmin:
-#    image: "phpmyadmin:5.1.0-apache"
-#    restart: unless-stopped
-#    ports:
-#      - '8080:80'
-#    depends_on:
-#      - mariadb
-#    volumes:
-#      - ./logs:/logging:z
-#    environment:
-#      - PMA_HOST=mariadb
-#volumes:
-#  database-volume:

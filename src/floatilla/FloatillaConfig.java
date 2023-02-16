@@ -74,6 +74,14 @@ public class FloatillaConfig {
     }
 
 
+    public String getMyProtocol() {
+        return myProtocol;
+    }
+
+    public void setMyProtocol(String myProtocol) {
+        this.myProtocol = myProtocol;
+    }
+
     public String getMyHostname() {
         return myHostname;
     }

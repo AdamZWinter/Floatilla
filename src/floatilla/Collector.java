@@ -29,21 +29,25 @@ public class Collector implements Runnable {
         int round = 1;                      //Things to do/not on/after the first round through this loop
         while(true){
             System.out.println("---------------------------------------------------------------------");
-            System.out.println("Start Round:");
+            System.out.println("Start Round: " + round);
             // not a deep copy of the sockets, just the set of sockets
             Set<PeerSocket> shallowCopy = floatilla.shallowCopyValidationSet();
             floatilla.clearValidationSet();
             Iterator<PeerSocket> currentlyValidating = shallowCopy.iterator();
-            System.out.println(currentlyValidating.hasNext());
+            System.out.println("Validation Set has next: " + currentlyValidating.hasNext());
             while(currentlyValidating.hasNext()){
                 PeerSocket currentSocket = currentlyValidating.next();
+                System.out.println("Current Socket: " + currentSocket);
                 if(!floatilla.contains(currentSocket) && !floatilla.isBlackListed(currentSocket)){
                     if(testSocket(currentSocket)){
+                        System.out.println("...testing current socket.");
                         floatilla.addValidatedSocket(currentSocket);
                         //currentlyValidating.remove();
                     }else{
                         //currentlyValidating.remove();
                     }
+                }else{
+                    System.out.println("... current socket already validated.");
                 }
                 try {
                     Thread.sleep(2000);
@@ -100,7 +104,9 @@ public class Collector implements Runnable {
         }
         urlBuilder.append("?config=");
         urlBuilder.append(config.getHash());
-        urlBuilder.append("&host=");
+        urlBuilder.append("&protocol=");
+        urlBuilder.append(config.getMyProtocol());
+        urlBuilder.append("&hostname=");
         urlBuilder.append(config.getMyHostname());
         if(config.useMyPort){
             urlBuilder.append("&port=");
@@ -146,9 +152,14 @@ public class Collector implements Runnable {
 
         } catch (SocketTimeoutException e){
             System.out.println("Connection timed out.");
-            //handle this timeout by removing this socket from the Set
+            return false;
+        } catch (UnknownHostException e) {
+            System.out.println("unknown host.");
+            return false;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("----------------------- IOException in testSocket: "+e);
+            //throw new RuntimeException(e);
+            return false;
         }
 
         Date dateEnd = new Date();

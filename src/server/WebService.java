@@ -69,7 +69,24 @@ public class WebService implements Runnable{
 
             String[] argArray = requestHeaders.get(0).split(" ");
             if(argArray[0].compareTo("GET") == 0){
-                performService("GET", argArray[1]);
+                //TODO: Verify config argument
+                //TODO: Read arguments and add peer to validation set
+                PeerSocket peerSocket = null;
+                peerSocket = parseQuery(argArray[1]);
+                if(peerSocket == null){
+                    //peer node has not correctly identified itself
+                    //or peer node has configuration mismatch
+                    System.out.println("Request from peer socket is malformed.");
+                    sendToClient.close();
+                    readFromClient.close();
+                    client.close();
+                    Thread.currentThread().interrupt();
+                    return;
+                }else{
+                    System.out.println("Queueing peer for validation by request: " + peerSocket);
+                    floatilla.queueForValidation(peerSocket);
+                    sendResponse("GET");
+                }
             }else{
                 System.out.println("Did not receive GET request.");
                 sendToClient.close();
@@ -84,7 +101,7 @@ public class WebService implements Runnable{
         }
     }
 
-    private void performService(String command, String requestPath) throws IOException {
+    private void sendResponse(String command) throws IOException {
         //floatilla.fakeValidateAll();
         Iterator<PeerSocket> flitr = floatilla.getValidatedIterator();
         //Map<String, Integer> socketMap = new HashMap<>();
@@ -116,6 +133,40 @@ public class WebService implements Runnable{
         sendToClient.close();
         readFromClient.close();
         client.close();
+    }
+
+    // assumes you are parsing a line that looks like:
+    // /path/resource?key=value&parameter=value
+    // which you got from a request header line that looks like this:
+    // GET /path/resource?key=value&parameter=value HTTP/1.1
+    private PeerSocket parseQuery(String path){
+        if(path == null || path.isEmpty()){         //basic sanity check
+            return null;
+        }
+        int indexOfQ = path.indexOf("?");           //where the query string starts
+        if(indexOfQ == -1){return  null;}
+        String queryString = path.substring(indexOfQ + 1);
+        String[] queryStringArray = queryString.split("&");
+        Map<String, String> kvMap = new HashMap<>();
+        for(String kvString : queryStringArray){
+            int indexOfE = kvString.indexOf("=");
+            if(indexOfE == -1 || indexOfE == 0){return  null;}
+            String[] kvPairArray = kvString.split("=");
+            kvMap.put(kvPairArray[0], kvPairArray[1]);
+        }
+        if(Integer.parseInt(kvMap.get("config")) != floatilla.getConfig().getHash()){
+            System.out.println("Config mismatch from peer query.");
+            return null;
+        }
+        PeerSocket peerSocket = new PeerSocket();
+        peerSocket.setProtocol(kvMap.get("protocol"));
+        peerSocket.setHostname(kvMap.get("hostname"));
+        peerSocket.setPort(Integer.parseInt(kvMap.get("port")));
+        if(kvMap.containsKey("path")){
+            peerSocket.setPath(kvMap.get("path"));
+        }
+
+        return peerSocket;
     }
 }
 

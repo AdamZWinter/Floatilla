@@ -1,0 +1,5 @@
+{
+  "peers":[["http","node01",8090]],
+  "numPeers":1,
+  "config":209046364
+}
