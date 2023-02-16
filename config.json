@@ -16,5 +16,6 @@
     }
   ],
   "rootCertAuthorities": ["placeholder01", "placeholder02", "placeholder03"],
-  "maxCertChainLength": 5
+  "maxCertChainLength": 5,
+  "revalidationRounds": 20
 }

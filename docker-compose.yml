@@ -4,33 +4,50 @@ services:
   node01:
     image: "floatilla:0.01"
     restart: unless-stopped
+    environment:
+        - NODE_HOSTNAME=node01
 #    depends_on:
 #      - mariadb
 #    ports:
 #      - '8091:8090'
 
-
   node02:
     image: "floatilla:0.01"
     restart: unless-stopped
-       depends_on:
+    depends_on:
          - node01
-#    ports:
-#      - '8092:8090'
+    environment:
+        - NODE_HOSTNAME=node02
 
   node03:
     image: "floatilla:0.01"
     restart: unless-stopped
-       depends_on:
-         - node02
-#    ports:
-#      - '8093:8090'
-
+    depends_on:
+      - node02
+    environment:
+        - NODE_HOSTNAME=node03
 
   node04:
     image: "floatilla:0.01"
     restart: unless-stopped
-       depends_on:
-         - node03
-#    ports:
-#      - '8094:8090'
+    depends_on:
+      - node03
+    environment:
+        - NODE_HOSTNAME=node04
+
+  node05:
+    image: "floatilla:0.01"
+    restart: unless-stopped
+    depends_on:
+      - node04
+    environment:
+        - NODE_HOSTNAME=node05
+
+  node06:
+    image: "floatilla:0.01"
+    restart: unless-stopped
+    depends_on:
+      - node05
+    environment:
+        - NODE_HOSTNAME=node06
+

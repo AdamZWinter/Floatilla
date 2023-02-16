@@ -20,6 +20,7 @@ public class FloatillaConfig {
     private Set<PeerSocket> seeds;
     private Set<String> rootCertAuthorities;  //placeholder
     private int maxCertChainLength;
+    private int revalidationRounds;
 
 
 
@@ -70,6 +71,7 @@ public class FloatillaConfig {
         }
 
         this.maxCertChainLength = jsonObject.getInt("maxCertChainLength");
+        this.revalidationRounds = jsonObject.getInt("revalidationRounds");
 
     }
 
@@ -119,5 +121,9 @@ public class FloatillaConfig {
 
     public Integer getHash(){
         return Objects.hash(urlPath, rootCertAuthorities, maxCertChainLength);
+    }
+
+    public int getRevalidationRounds() {
+        return revalidationRounds;
     }
 }

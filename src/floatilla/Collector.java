@@ -50,7 +50,7 @@ public class Collector implements Runnable {
                     System.out.println("... current socket already validated.");
                 }
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -60,10 +60,9 @@ public class Collector implements Runnable {
                 floatilla.removeSeeds();
             }
 
-            if(round == 101){
-                System.out.println("100 collection rounds completed");
+            if(round % config.getRevalidationRounds() == 0){
+                System.out.println(round + " collection rounds completed");
                 floatilla.stageReValidation();
-                round = 2;
             }
 
             if(round > 2 && floatilla.hasEmptyValidationSet()){
